@@ -85,7 +85,9 @@ def set_softsplat_weight(x):
 
 
 
-def view_reprojection(pointcloud, rotation_color, translation_color, translation_target, P1, h, w, mask_cam, img_rect, est_depth):
+def view_reprojection(pointcloud, rotation_color, translation_color, 
+                    translation_target, P1, h, w, mask_cam, 
+                    img_rect, est_depth):
     
     #point cloud reprojection
     point3d1_x = pointcloud[:,:,0]
@@ -126,8 +128,14 @@ def view_reprojection(pointcloud, rotation_color, translation_color, translation
     src_disp_torch = 1. / (src_depth_torch + 1e-4)
     src_disp_torch = torch.clip(src_disp_torch, min=0., max=5.0) # ignore if depth is closer than 5 diopters
     weight_torch = set_softsplat_weight(src_disp_torch)
+    
     src_rgbd_torch = torch.cat((src_color_torch, src_disp_torch), dim=1)
-    warped_rgbd_torch = softsplat.FunctionSoftsplat(tenInput=src_rgbd_torch.cuda().contiguous(), tenFlow=flow_torch.cuda().contiguous(), tenMetric=weight_torch.cuda().contiguous(), strType='softmax') #
+
+    warped_rgbd_torch = softsplat.FunctionSoftsplat(
+        tenInput=src_rgbd_torch.cuda().contiguous(), 
+        tenFlow=flow_torch.cuda().contiguous(), 
+        tenMetric=weight_torch.cuda().contiguous(), 
+        strType='softmax') #
 
     return warped_rgbd_torch
 

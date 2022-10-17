@@ -95,7 +95,7 @@ class UNet2d(nn.Module):
         return (self.tanh(out) + 1.0) / 2.0
 
 
-
+#Neural PassThrough (NPT)
 class NPTnet(nn.Module):
     def __init__(self):
         super(NPTnet, self).__init__()

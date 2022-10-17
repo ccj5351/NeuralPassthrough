@@ -57,10 +57,12 @@ if __name__ == "__main__":
        
     ## stereo camera calibration parameters
     # cam 1 (left)
+    # cameraMatrix
     mtx_color = np.array([[6.2332931772538961e+02, 0., 6.3888145428055736e+02], \
     [0., 6.1953917327840998e+02, 3.7066713576436177e+02], \
     [0., 0., 1.]])
-
+    
+    # distCoeffs
     dis_color = np.array([ -5.0697015067885678e+00, 6.1600339159069026e+00,\
     2.5148074413211077e-05, -3.6152071916631872e-04,\
     9.7464488594834560e+00, -5.1645013593153148e+00,\
@@ -91,7 +93,16 @@ if __name__ == "__main__":
 
     ## stereo rectification parameters
     h, w = 720, 1280
-    R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(mtx_color, dis_color, mtx_color_2, dis_color_2, (w, h), rotation_color_2, translation_color_2, alpha=1.)
+    R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(
+        mtx_color, # First camera intrinsic matrix;
+        dis_color, # First camera distortion parameters;
+        mtx_color_2, 
+        dis_color_2, 
+        (w, h), # Size of the image used for stereo calibration;
+        rotation_color_2, # Rotation matrix from the coordinate system of the first camera to the second camera, see stereoCalibrate;
+        translation_color_2, # Translation vector from the coordinate system of the first camera to the second camera;
+        alpha=1.
+        )
     mapx1, mapy1 = cv2.initUndistortRectifyMap(mtx_color, dis_color, R1, P1, (w, h), cv2.CV_32F)
     mapx2, mapy2 = cv2.initUndistortRectifyMap(mtx_color_2, dis_color_2, R2, P2, (w, h), cv2.CV_32F)    
     translation_color_2_after_rectification = np.array([[P2[0][3]/P2[0][0], 0, 0]]).T
@@ -162,8 +173,14 @@ if __name__ == "__main__":
             translation_target = np.array([[tgt_view_x[vv], 0., tgt_view_z]]).T
 
             # view reprojection
-            warped_rgbd_torch = view_reprojection(pointcloud, rotation_none, translation_none, translation_target, P1, h, w, mask_cam, img_rect, est_depth)
-            warped_rgbd_torch_2 = view_reprojection(pointcloud2, rotation_none, translation_color_2_after_rectification, translation_target, P2, h, w, mask_cam_2, img_rect_2, est_depth_2)
+            warped_rgbd_torch = view_reprojection(
+                pointcloud, rotation_none, translation_none, 
+                translation_target, P1, h, w, mask_cam, 
+                img_rect, est_depth)
+            warped_rgbd_torch_2 = view_reprojection(
+                pointcloud2, rotation_none, translation_color_2_after_rectification, 
+                translation_target, P2, h, w, mask_cam_2, 
+                img_rect_2, est_depth_2)
 
             model.eval()
 
